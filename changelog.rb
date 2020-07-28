@@ -1,0 +1,116 @@
+# frozen_string_literal: true
+
+# A small wrapper class for more easily generating and manipulating Github/Git
+# changelogs. Given two different git objects (sha, tag, whatever), it will
+# find all PRs that made up that diff and store them as a list. Also allows
+# for filtering by label, and the importance of that change (priorities), based
+# on how we classify the importance of PRs in the paritytech/polkadot project.
+# Probably not tremendously useful to other projects.
+class Changelog
+  require 'github_api'
+
+  attr_accessor :changes
+  attr_reader :priority
+
+  @priorities = [
+    {
+      priority: 1,
+      label: 'C1-low',
+      text: 'Upgrade priority: **Low** (upgrade at your convenience)'
+    },
+    {
+      priority: 3,
+      label: 'C3-medium',
+      text: 'Upgrade priority: **Medium** (timely upgrade recommended)'
+    },
+    {
+      priority: 7,
+      label: 'C7-high',
+      text: 'Upgrade priority:❗ **HIGH** ❗ Please upgrade your node as soon as possible'
+    },
+    {
+      priority: 9,
+      label: 'C9-critical',
+      text: 'Upgrade priority: ❗❗ **URGENT** ❗❗ PLEASE UPGRADE IMMEDIATELY'
+    }
+  ]
+
+  class << self
+    attr_reader :priorities
+  end
+
+  # Return highest priority from an array of changes (NOT the actual Changelog
+  # object)
+  def self.highest_priority_for_changes(changes)
+    @priorities.find do |p|
+      p[:priority] == changes.map do |change|
+        change[:priority][:priority]
+      end.max
+    end
+  end
+
+  def self.changes_with_label(changes, label)
+    changes.select do |change|
+      change.labels.any? { |c| c[:name] == label } == true
+    end
+  end
+
+  ## End of class methods
+
+  # github_repo: 'paritytech/polkadot'
+  # from: some git ref e.g., 7e30258, v1.2.3
+  # to: some git ref e.g., 7e30258, v1.2.3
+  #
+  # Optional named parameters:
+  # token: a Github personal access token
+  # prefix: whether or not to prefix PR numbers with their repo in the changelog
+  def initialize(github_repo, from, to, token: '', prefix: nil)
+    org, repo = github_repo.split('/')
+    @ghr = github_repo
+    @priorities = self.class.priorities
+    @gh = Github.new do |c|
+      c.oauth_token = token
+      c.org = org
+      c.repo = repo
+    end
+    @changes = prs_from_ids(pr_ids_from_git_diff(from, to), prefix)
+    # add priority to each change
+    @changes.map { |c| apply_priority_to_change(c) }
+  end
+
+  def changes_with_label(label)
+    self.class.changes_with_label(@changes, label)
+  end
+
+  private
+
+  def apply_priority_to_change(change)
+    @priorities.each do |p|
+      change[:priority] = p if change.labels.any? { |l| l[:name] == p[:label] }
+    end
+    change
+  end
+
+  def pr_ids_from_git_diff(from, to)
+    @gh.repos.commits.compare(@gh.org, @gh.repo, from, to).body.commits.map do |l|
+      title = l.commit.message.split("\n\n").first
+      next unless title =~ /\(#[0-9]+\)$/
+
+      title.gsub(/.*#([0-9]+)\)$/, '\1')
+    end.compact
+  end
+
+  def prs_from_ids(ids, prefix)
+    prs = []
+    ids.each do |pr|
+      pull = @gh.pull_requests.get(@gh.org, @gh.repo, pr).body
+      pull[:pretty_title] = if prefix
+                              "#{pull[:title]} (#{@ghr}##{pull[:number]})"
+                            else
+                              "#{pull[:title]} (##{pull[:number]})"
+                            end
+      prs.push pull
+    end
+    prs
+  end
+end
