@@ -7,7 +7,7 @@
 # on how we classify the importance of PRs in the paritytech/polkadot project.
 # Probably not tremendously useful to other projects.
 class Changelog
-  require 'github_api'
+  require 'octokit'
 
   attr_accessor :changes
   attr_reader :priority
@@ -65,14 +65,11 @@ class Changelog
   # token: a Github personal access token
   # prefix: whether or not to prefix PR numbers with their repo in the changelog
   def initialize(github_repo, from, to, token: '', prefix: nil)
-    org, repo = github_repo.split('/')
-    @ghr = github_repo
+    @repo = github_repo
     @priorities = self.class.priorities
-    @gh = Github.new do |c|
-      c.oauth_token = token
-      c.org = org
-      c.repo = repo
-    end
+    @gh = Octokit::Client.new(
+      access_token: token
+    )
     @changes = prs_from_ids(pr_ids_from_git_diff(from, to), prefix)
     # add priority to each change
     @changes.map { |c| apply_priority_to_change(c) }
@@ -92,8 +89,8 @@ class Changelog
   end
 
   def pr_ids_from_git_diff(from, to)
-    @gh.repos.commits.compare(@gh.org, @gh.repo, from, to).body.commits.map do |l|
-      title = l.commit.message.split("\n\n").first
+    @gh.compare(@repo, from, to).commits.map do |c|
+      title = c.commit.message.split("\n\n").first
       next unless title =~ /\(#[0-9]+\)$/
 
       title.gsub(/.*#([0-9]+)\)$/, '\1')
@@ -103,9 +100,9 @@ class Changelog
   def prs_from_ids(ids, prefix)
     prs = []
     ids.each do |pr|
-      pull = @gh.pull_requests.get(@gh.org, @gh.repo, pr).body
+      pull = @gh.pull_request(@repo, pr)
       pull[:pretty_title] = if prefix
-                              "#{pull[:title]} (#{@ghr}##{pull[:number]})"
+                              "#{pull[:title]} (#{@repo}##{pull[:number]})"
                             else
                               "#{pull[:title]} (##{pull[:number]})"
                             end

@@ -2,8 +2,8 @@
 
 Gem::Specification.new do |s|
   s.name = 'changelogerator'
-  s.version = '0.0.2'
-  s.date = '2020-07-28'
+  s.version = '0.0.3'
+  s.date = '2020-09-02'
   s.summary = 'Changelog generation/management'
   s.description = 'Simple helper class for paritytech/polkadot changelogs'
   s.authors = ['Martin Pugh']
