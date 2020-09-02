@@ -8,6 +8,7 @@
 # Probably not tremendously useful to other projects.
 class Changelog
   require 'octokit'
+  require 'git_diff_parser'
 
   attr_accessor :changes
   attr_reader :priority
@@ -55,6 +56,15 @@ class Changelog
     end
   end
 
+  def self.changes_files_in_paths?(change, paths)
+    changed_files = GitDiffParser.parse(Octokit.get(change.diff_url)).files
+    paths = [paths] unless paths.is_a? Array
+    paths.each do |path|
+      return true if changed_files.find { |l| l.match path }
+    end
+    nil
+  end
+
   ## End of class methods
 
   # github_repo: 'paritytech/polkadot'
@@ -77,6 +87,11 @@ class Changelog
 
   def changes_with_label(label)
     self.class.changes_with_label(@changes, label)
+  end
+
+  def runtime_changes?
+    
+    nil
   end
 
   private
