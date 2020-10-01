@@ -80,7 +80,8 @@ class Changelog
     @gh = Octokit::Client.new(
       access_token: token
     )
-    @changes = prs_from_ids(pr_ids_from_git_diff(from, to), prefix)
+    @prefix = prefix
+    @changes = prs_from_ids(pr_ids_from_git_diff(from, to))
     # add priority to each change
     @changes.map { |c| apply_priority_to_change(c) }
   end
@@ -90,8 +91,16 @@ class Changelog
   end
 
   def runtime_changes?
-    
     nil
+  end
+
+  def add(change)
+    changes.prepend(apply_priority_to_change(change))
+  end
+
+  def add_from_id(id)
+    pull = @gh.pull_request(@repo, id)
+    add(prettify_title(pull))
   end
 
   private
@@ -103,6 +112,15 @@ class Changelog
     change
   end
 
+  def prettify_title(pull)
+    pull[:pretty_title] = if @prefix
+                            "#{pull[:title]} (#{@repo}##{pull[:number]})"
+                          else
+                            "#{pull[:title]} (##{pull[:number]})"
+                          end
+    pull
+  end
+
   def pr_ids_from_git_diff(from, to)
     @gh.compare(@repo, from, to).commits.map do |c|
       title = c.commit.message.split("\n\n").first
@@ -112,15 +130,11 @@ class Changelog
     end.compact
   end
 
-  def prs_from_ids(ids, prefix)
+  def prs_from_ids(ids)
     prs = []
     ids.each do |pr|
       pull = @gh.pull_request(@repo, pr)
-      pull[:pretty_title] = if prefix
-                              "#{pull[:title]} (#{@repo}##{pull[:number]})"
-                            else
-                              "#{pull[:title]} (##{pull[:number]})"
-                            end
+      pull = prettify_title(pull)
       prs.push pull
     end
     prs
