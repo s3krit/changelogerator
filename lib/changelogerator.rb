@@ -143,5 +143,6 @@ class Changelog
       cur_batch = cur_batch.rels[:next].get
     end
     prs.flatten
+    prs.map { |pr| prettify_title(pr) }
   end
 end
