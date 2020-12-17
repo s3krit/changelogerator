@@ -127,16 +127,21 @@ class Changelog
       next unless title =~ /\(#[0-9]+\)$/
 
       title.gsub(/.*#([0-9]+)\)$/, '\1')
-    end.compact
+    end.compact.map(&:to_i)
   end
 
   def prs_from_ids(ids)
+    batch_size = 100
     prs = []
-    ids.each do |pr|
-      pull = @gh.pull_request(@repo, pr)
-      pull = prettify_title(pull)
-      prs.push pull
+    @gh.pulls(@repo, state: 'closed', per_page: batch_size)
+    cur_batch = @gh.last_response
+    until ids.empty?
+      prs += cur_batch.data.select { |pr| ids.include? pr.number }
+      ids -= cur_batch.data.map(&:number)
+      break if cur_batch.rels[:last].nil?
+
+      cur_batch = cur_batch.rels[:next].get
     end
-    prs
+    prs.flatten
   end
 end
