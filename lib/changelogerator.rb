@@ -109,6 +109,8 @@ class Changelog
     @priorities.each do |p|
       change[:priority] = p if change[:labels].any? { |l| l[:name] == p[:label] }
     end
+    # Failsafe: add lowest priority if none detected
+    change[:priority] ||= @priorities[0]
     change
   end
 
