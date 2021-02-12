@@ -95,12 +95,12 @@ class Changelog
   end
 
   def add(change)
-    changes.prepend(apply_priority_to_change(change))
+    changes.prepend(prettify_title(apply_priority_to_change(change)))
   end
 
   def add_from_id(id)
     pull = @gh.pull_request(@repo, id)
-    add(prettify_title(pull))
+    add pull
   end
 
   private
