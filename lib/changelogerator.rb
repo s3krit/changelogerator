@@ -52,7 +52,7 @@ class Changelog
 
   def self.changes_with_label(changes, label)
     changes.select do |change|
-      change.labels.any? { |c| c[:name] == label } == true
+      change[:labels].any? { |c| c[:name] == label } == true
     end
   end
 
@@ -81,7 +81,7 @@ class Changelog
       access_token: token
     )
     @prefix = prefix
-    @changes = prs_from_ids(pr_ids_from_git_diff(from, to))
+    @changes = prs_from_ids(pr_ids_from_git_diff(from, to)).map(&:to_hash)
     # add priority to each change
     @changes.map { |c| apply_priority_to_change(c) }
   end
@@ -95,20 +95,22 @@ class Changelog
   end
 
   def add(change)
-    changes.prepend(apply_priority_to_change(change))
+    changes.prepend(prettify_title(apply_priority_to_change(change)))
   end
 
   def add_from_id(id)
     pull = @gh.pull_request(@repo, id)
-    add(prettify_title(pull))
+    add pull
   end
 
   private
 
   def apply_priority_to_change(change)
     @priorities.each do |p|
-      change[:priority] = p if change.labels.any? { |l| l[:name] == p[:label] }
+      change[:priority] = p if change[:labels].any? { |l| l[:name] == p[:label] }
     end
+    # Failsafe: add lowest priority if none detected
+    change[:priority] ||= @priorities[0]
     change
   end
 
