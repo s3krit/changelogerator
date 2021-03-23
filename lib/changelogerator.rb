@@ -16,22 +16,22 @@ class Changelog
   @priorities = [
     {
       priority: 1,
-      label: 'C1-low',
+      label: 'C1-low 📌',
       text: 'Upgrade priority: **Low** (upgrade at your convenience)'
     },
     {
       priority: 3,
-      label: 'C3-medium',
+      label: 'C3-medium 📣',
       text: 'Upgrade priority: **Medium** (timely upgrade recommended)'
     },
     {
       priority: 7,
-      label: 'C7-high',
+      label: 'C7-high ❗️',
       text: 'Upgrade priority:❗ **HIGH** ❗ Please upgrade your node as soon as possible'
     },
     {
       priority: 9,
-      label: 'C9-critical',
+      label: 'C9-critical ‼️',
       text: 'Upgrade priority: ❗❗ **URGENT** ❗❗ PLEASE UPGRADE IMMEDIATELY'
     }
   ]
