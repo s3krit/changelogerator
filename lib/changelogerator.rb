@@ -47,7 +47,7 @@ class Changelog
       p[:priority] == changes.map do |change|
         change[:priority][:priority]
       end.max
-    end
+    end || @priorities[0]
   end
 
   def self.changes_with_label(changes, label)
@@ -81,7 +81,7 @@ class Changelog
       access_token: token
     )
     @prefix = prefix
-    @changes = prs_from_ids(pr_ids_from_git_diff(from, to)).map(&:to_hash)
+    @changes = prs_from_ids(pr_ids_from_git_diff(from, to))
     # add priority to each change
     @changes.map { |c| apply_priority_to_change(c) }
   end
