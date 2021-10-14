@@ -1,0 +1,32 @@
+WARNING: `Faraday::Connection#authorization` is deprecated; it will be removed in version 2.0.
+While initializing your connection, use `#request(:authorization, ...)` instead.
+See https://lostisland.github.io/faraday/middleware/authentication for more usage info.
+[2021-10-14T15:06:07Z INFO  tera] Running tera-cli v0.2.0
+[2021-10-14T15:06:07Z DEBUG tera] opts:
+    Opts {
+        template: "polkadot.md",
+        include: false,
+        include_path: None,
+        context: Some(
+            "polkadot.json",
+        ),
+        stdin: false,
+        env: true,
+        env_key: Some(
+            "env",
+        ),
+        env_first: false,
+        fail_on_collision: false,
+        env_only: false,
+        out: None,
+        autoescape: false,
+    }
+[2021-10-14T15:06:07Z DEBUG tera::wrapped_context] Appending json
+[2021-10-14T15:06:07Z INFO  tera::wrapped_context] Appending env to context, env-key: Some("env")
+[2021-10-14T15:06:07Z DEBUG tera::wrapped_context] Appending env
+thread 'main' panicked at 'called `Result::unwrap()` on an `Err` value: Error { kind: Msg("Failed to render '__tera_one_off'"), source: Some(Error { kind: Msg("Variable `env.RUST_STABLE` not found in context while rendering '__tera_one_off'"), source: None }) }', src/main.rs:64:66
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+real	0m0.037s
+user	0m0.016s
+sys	0m0.007s
