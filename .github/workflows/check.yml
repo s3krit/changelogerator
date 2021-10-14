@@ -12,6 +12,10 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        ruby-version: [2.7.x, head]
+
     steps:
       - uses: actions/checkout@v2
       - name: Set up Ruby

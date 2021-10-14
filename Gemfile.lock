@@ -12,6 +12,7 @@ GEM
     octokit (4.18.0)
       faraday (>= 0.9)
       sawyer (~> 0.8.0, >= 0.5.3)
+    power_assert (2.0.1)
     pry (0.13.1)
       coderay (~> 1.1)
       method_source (~> 1.0)
@@ -19,9 +20,12 @@ GEM
       pry (~> 0.11)
       yard (~> 0.9.11)
     public_suffix (4.0.5)
+    rake (13.0.6)
     sawyer (0.8.2)
       addressable (>= 2.3.5)
       faraday (> 0.8, < 2.0)
+    test-unit (3.4.8)
+      power_assert
     yard (0.9.25)
 
 PLATFORMS
@@ -32,6 +36,8 @@ DEPENDENCIES
   octokit (~> 4)
   pry (~> 0.13.1)
   pry-doc (~> 1.1)
+  rake
+  test-unit
 
 BUNDLED WITH
    2.2.22
