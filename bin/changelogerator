@@ -1,0 +1,75 @@
+#!/usr/bin/env ruby
+
+require "optparse"
+require_relative "../lib/changelogerator"
+require "logger"
+
+@options = {
+  from: nil,
+  to: nil,
+}
+
+logger = Logger.new(STDOUT)
+logger.debug("Starting")
+logger.level = Logger::WARN
+
+OptionParser.new do |opts|
+  opts.banner = "
+  Changelogerator helps you generate a template friendly context made of the changes
+  between 2 references on your Github project.
+
+  Usage:
+  changelogerator [options]"
+
+  opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
+    @options[:verbose] = v
+  end
+
+  #   cli paritytech/polkadot --from <ref1> --to <ref2> [--no-prefix]
+  opts.on("-fFROM", "--from=FROM", "From Ref.") do |f|
+    @options[:from] = f
+  end
+
+  opts.on("-tTO", "--to=TO", "To Ref.") do |t|
+    @options[:to] = t
+  end
+
+  opts.on("-p", "--[no-]prefix", "Add (or not) a prefix for the repo") do |p|
+    @options[:prefix] = p
+  end
+
+  opts.on("-h", "--help", "Prints this help") do
+    puts opts
+    exit
+  end
+end.parse!
+
+# p @options
+# p ARGV
+
+@options[:repo] = ARGV[0]
+
+def validate
+  raise "Missing value for the 'repo' field" unless @options[:repo]
+  raise "Missing value for the 'from' field" unless @options[:from]
+  raise "Missing value for the 'to' field" unless @options[:to]
+  # p "from: %s" % [@options.from]
+  true
+end
+
+exit 1 unless validate
+
+logger.debug("Validation passed")
+logger.debug(" - repo: %s" % [@options[:repo]])
+logger.debug(" - from: %s" % [@options[:from]])
+logger.debug(" - to: %s" % [@options[:to]])
+
+cl = Changelog.new(
+  @options[:repo],
+  @options[:from],
+  @options[:to],
+  token: ENV["GITHUB_TOKEN"],
+  prefix: @options[:prefix],
+)
+
+puts cl.to_json

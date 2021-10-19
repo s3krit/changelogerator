@@ -15,3 +15,7 @@ gem "pry-doc", "~> 1.1", :group => :dev
 gem "rake", :group => :dev
 
 gem "test-unit", :group => :dev
+
+gem "optparse", "~> 0.1.1"
+
+gem "logger", "~> 1.4"

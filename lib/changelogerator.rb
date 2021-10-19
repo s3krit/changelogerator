@@ -1,43 +1,20 @@
 # frozen_string_literal: true
+require 'pry'
 
 # A small wrapper class for more easily generating and manipulating Github/Git
 # changelogs. Given two different git objects (sha, tag, whatever), it will
 # find all PRs that made up that diff and store them as a list. Also allows
 # for filtering by label, and the importance of that change (labels), based
 # on how we classify the importance of PRs in the paritytech/polkadot project.
-# Probably not tremendously useful to other projects.
 class Changelog
   require "octokit"
   require "git_diff_parser"
   require "json"
 
-  attr_accessor :changes
+  attr_accessor :changes, :hasKey
   attr_reader :label
 
   @labels = []
-
-  # [
-  #   {
-  #     priority: 1,
-  #     label: "C1-low 📌",
-  #     text: "Upgrade priority: **Low** (upgrade at your convenience)",
-  #   },
-  #   {
-  #     priority: 3,
-  #     label: "C3-medium 📣",
-  #     text: "Upgrade priority: **Medium** (timely upgrade recommended)",
-  #   },
-  #   {
-  #     priority: 7,
-  #     label: "C7-high ❗️",
-  #     text: "Upgrade priority:❗ **HIGH** ❗ Please upgrade your node as soon as possible",
-  #   },
-  #   {
-  #     priority: 9,
-  #     label: "C9-critical ‼️",
-  #     text: "Upgrade priority: ❗❗ **URGENT** ❗❗ PLEASE UPGRADE IMMEDIATELY",
-  #   },
-  # ]
 
   class << self
     attr_reader :labels
@@ -96,10 +73,6 @@ class Changelog
     @changes.map { |c| apply_priority_to_change(c) }
   end
 
-  def runtime_changes?
-    nil
-  end
-
   def add(change)
     changes.prepend(prettify_title(apply_priority_to_change(change)))
   end
@@ -126,6 +99,7 @@ class Changelog
       commit.head = nil
       commit.base = nil
       commit._links = nil
+
     end
     commits = { commits: obj.map(&:to_h) }
     # JSON.fast_generate(commits.map(&:to_h), opts)
@@ -135,14 +109,28 @@ class Changelog
   private
 
   def apply_priority_to_change(change)
+    obj = {}
     @labels.each do |p|
-      change[:label] = p if change[:labels].any? { |l| l[:name] == p[:label] }
+      has = false
+      has = true if change[:labels].any? { |l|
+        l[:name] == p[:label]
+      }
+
+      change[:label] = p if has
+      k = p[:label]
+      # binding.pry
+
+      obj[k] = has
+
+      change[:hasKey]= obj
     end
     # Failsafe: add lowest priority if none detected
-    change[:label] ||= @labels[0]
+    # change[:label] ||= @labels[0]
+
     change
   end
 
+  # Prepend the repo if @prefix is true
   def prettify_title(pull)
     pull[:pretty_title] = if @prefix
         "#{pull[:title]} (#{@repo}##{pull[:number]})"
