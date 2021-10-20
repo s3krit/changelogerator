@@ -6,7 +6,7 @@ sdfgfd
 {% if meta.C.max >= 7 %}
  important sutff:
 
- {% for commit in data %}
+ {% for commit in changes %}
     +++++
          {% if commit.foo is containing("C7") or commit.foo is containing("C8") or commit.foo is containing("C9") %}
             - {{commit.commit}}: {{ commit.foo | json_encode() }}
@@ -22,7 +22,7 @@ sdfgfd
 
 ===========
 
-{% for commit in data %}
+{% for commit in changes %}
     ****
          {% if commit.foo is containing("D0") %}
             {{commit.commit}}: {{ commit.foo | json_encode() }}

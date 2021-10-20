@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-require 'pry'
+require "pry"
 
 # A small wrapper class for more easily generating and manipulating Github/Git
 # changelogs. Given two different git objects (sha, tag, whatever), it will
@@ -11,23 +11,25 @@ class Changelog
   require "git_diff_parser"
   require "json"
 
-  attr_accessor :changes, :hasKey
+  attr_accessor :changes
   attr_reader :label
 
-  @labels = []
+  # @labels = []
 
-  class << self
-    attr_reader :labels
-  end
+  # class << self
+  #   attr_reader :labels
+  # end
 
   # Return highest priority from an array of changes
   # WARNING: This is NOT the actual Changelog object
   def self.highest_priority_for_changes(changes)
-    @labels.find do |p|
-      p[:label] == changes.map do |change|
-        change[:label][:label]
-      end.max
-    end || @labels[0]
+    # TODO: replace the behavior
+
+    # @labels.find do |p|
+    #   p[:label] == changes.map do |change|
+    #     change[:label][:label]
+    #   end.max
+    # end || @labels[0]
   end
 
   def self.changes_with_label(changes, label)
@@ -36,9 +38,9 @@ class Changelog
     end
   end
 
-  def self.add_label(label)
-    @labels.append(label)
-  end
+  # def self.add_label(label)
+  #   @labels.append(label)
+  # end
 
   # Return the list of all the files in the changeset
   # that also in the given path
@@ -47,6 +49,17 @@ class Changelog
     paths = [paths] unless paths.is_a? Array
     paths.each do |path|
       return true if changed_files.find { |l| l.match path }
+    end
+    nil
+  end
+
+  # Return the label code for a change
+  # if the label name matches the expected pattern.
+  # nil otherwise.
+  def self.get_label_code(name)
+    if match = name.match(/^([a-z])(\d+)-(.*)$/i)
+      letter, number, text = match.captures
+      return [letter, number, text]
     end
     nil
   end
@@ -60,21 +73,29 @@ class Changelog
   # Optional named parameters:
   # token: a Github personal access token
   # prefix: whether or not to prefix PR numbers with their repo in the changelog
-  def initialize(github_repo, from, to, token: "", labels: [], prefix: nil)
+  def initialize(github_repo, from, to, token: "", prefix: nil)
     @repo = github_repo
-    @labels = labels
+    # @labels = labels
     @gh = Octokit::Client.new(
       access_token: token,
     )
     @prefix = prefix
     @changes = prs_from_ids(pr_ids_from_git_diff(from, to))
+    @changes.map do |c|
+      compute_change_meta(c)
+    end
+
+    @meta = compute_global_meta()
 
     # add priority to each change
-    @changes.map { |c| apply_priority_to_change(c) }
+    # @changes.map { |c| apply_priority_to_change(c) }
   end
 
   def add(change)
-    changes.prepend(prettify_title(apply_priority_to_change(change)))
+    compute_change_meta(change)
+    prettify_title(change)
+    changes.prepend(change)
+    # changes.prepend(prettify_title(apply_priority_to_change(change)))
   end
 
   # Add a pull request from id
@@ -94,41 +115,76 @@ class Changelog
     }
     obj = @changes
     obj.map do |commit|
-      # here we remove some of the fields to reduce the size
+      # here we remove some of the fields to reduce (considerably) the size
       # of the json output
       commit.head = nil
       commit.base = nil
       commit._links = nil
-
     end
-    commits = { commits: obj.map(&:to_h) }
+    commits = {
+      cl: {
+        meta: @meta,
+        changes: obj.map(&:to_h),
+      },
+    }
+
     # JSON.fast_generate(commits.map(&:to_h), opts)
     JSON.fast_generate(commits, opts)
   end
 
   private
 
-  def apply_priority_to_change(change)
-    obj = {}
-    @labels.each do |p|
-      has = false
-      has = true if change[:labels].any? { |l|
-        l[:name] == p[:label]
-      }
+  # Compute and attach metadata about one change
+  def compute_change_meta(change)
+    meta = Hash.new
 
-      change[:label] = p if has
-      k = p[:label]
-      # binding.pry
-
-      obj[k] = has
-
-      change[:hasKey]= obj
+    change.labels.each do |label|
+      letter, number, text = self.class.get_label_code(label.name)
+      if letter && number
+        meta[letter] = {
+          value: number.to_i,
+          text: text,
+        }
+      end
     end
-    # Failsafe: add lowest priority if none detected
-    # change[:label] ||= @labels[0]
 
-    change
+    change["meta"] = meta
   end
+
+  # Go through all changes and compute some
+  # aggregated values
+  def compute_global_meta
+    return {
+             C: {
+               min: 1,
+               max: 4,
+               count: 18,
+             },
+           }
+    # p "NOT DONE YET"
+  end
+
+  # def apply_priority_to_change(change)
+  #   obj = {}
+  #   @labels.each do |p|
+  #     has = false
+  #     has = true if change[:labels].any? { |l|
+  #       l[:name] == p[:label]
+  #     }
+
+  #     change[:label] = p if has
+  #     k = p[:label]
+  #     # binding.pry
+
+  #     obj[k] = has
+
+  #     change[:hasKey]= obj
+  #   end
+  #   # Failsafe: add lowest priority if none detected
+  #   # change[:label] ||= @labels[0]
+
+  #   change
+  # end
 
   # Prepend the repo if @prefix is true
   def prettify_title(pull)
