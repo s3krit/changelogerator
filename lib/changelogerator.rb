@@ -12,6 +12,7 @@ class Changelog
   require "json"
 
   attr_accessor :changes
+  attr_accessor :meta
   attr_reader :label
 
   # @labels = []
@@ -35,6 +36,30 @@ class Changelog
   def self.changes_with_label(changes, label)
     changes.select do |change|
       change[:labels].any? { |c| c[:name] == label } == true
+    end
+  end
+
+  # Go through all changes and compute some
+  # aggregated values
+  def compute_global_meta()
+    @meta = {}
+
+    @changes.each do |change|
+      # here we remove some of the fields to reduce (considerably) the size
+      # of the json output
+      change.head = nil
+      change.base = nil
+      change._links = nil
+
+      change[:meta].keys.each do |meta_key|
+        current = change[:meta][meta_key]
+
+        meta[meta_key] = {} unless meta[meta_key]
+        meta[meta_key][:min] = current[:value] if !meta[meta_key][:min] || current[:value] < meta[meta_key][:min]
+        meta[meta_key][:max] = current[:value] if !meta[meta_key][:max] || current[:value] > meta[meta_key][:max]
+        meta[meta_key][:count] = 0 if !meta[meta_key][:count]
+        meta[meta_key][:count]  += 1
+      end
     end
   end
 
@@ -85,7 +110,9 @@ class Changelog
       compute_change_meta(c)
     end
 
-    @meta = compute_global_meta()
+    compute_global_meta()
+
+    # binding.pry
 
     # add priority to each change
     # @changes.map { |c| apply_priority_to_change(c) }
@@ -95,6 +122,7 @@ class Changelog
     compute_change_meta(change)
     prettify_title(change)
     changes.prepend(change)
+    @meta = compute_global_meta()
     # changes.prepend(prettify_title(apply_priority_to_change(change)))
   end
 
@@ -114,13 +142,7 @@ class Changelog
       space: " ",
     }
     obj = @changes
-    obj.map do |commit|
-      # here we remove some of the fields to reduce (considerably) the size
-      # of the json output
-      commit.head = nil
-      commit.base = nil
-      commit._links = nil
-    end
+
     commits = {
       cl: {
         meta: @meta,
@@ -149,19 +171,6 @@ class Changelog
     end
 
     change["meta"] = meta
-  end
-
-  # Go through all changes and compute some
-  # aggregated values
-  def compute_global_meta
-    return {
-             C: {
-               min: 1,
-               max: 4,
-               count: 18,
-             },
-           }
-    # p "NOT DONE YET"
   end
 
   # def apply_priority_to_change(change)

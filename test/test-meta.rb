@@ -1,4 +1,4 @@
-require 'json'
+require "json"
 require_relative "../lib/changelogerator"
 require "test/unit"
 
@@ -27,9 +27,15 @@ class TestChangelogerator < Test::Unit::TestCase
 
     j = cl.to_json
     assert_equal(1, cl.changes.length)
+    assert_equal(["A", "B", "C"], cl.changes[0].meta.keys ) # A2 + B0 + C1
+
+    # assert_equal(1, cl.meta.A?.count)
+
+    p cl.meta
+
     puts "JSON Length: %d" % [j.length]
-    assert(j.length > 4_700)
-    assert(j.length < 4_800)
+    assert(j.length > 4_600)
+    assert(j.length < 5_000)
 
     # puts j
   end
