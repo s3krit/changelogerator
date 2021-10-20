@@ -32,8 +32,8 @@ class TestChangelogerator < Test::Unit::TestCase
     File.open('/tmp/polkadot.json', 'w') { |file| file.write(j) }
     assert_equal(244, cl.changes.length)
     puts "JSON Length: %d" % [j.length]
-    assert(j.length > 1_500_000)
-    assert(j.length < 1_600_000)
+    assert(j.length > 1_600_000)
+    assert(j.length < 1_700_000)
   end
 
   def test_cumulus_many_commits

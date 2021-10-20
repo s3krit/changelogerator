@@ -3,7 +3,7 @@ require_relative "../lib/changelogerator"
 require "test/unit"
 
 class TestChangelogerator < Test::Unit::TestCase
-  def test_polkadot_1_commit
+  def test_helpers
     letter, number, text = Changelog.get_label_code("B2-test")
     assert_equal("B", letter)
     assert_equal("2", number)
