@@ -27,7 +27,7 @@ class TestChangelogerator < Test::Unit::TestCase
 
     j = cl.to_json
     assert_equal(1, cl.changes.length)
-    assert_equal(["A", "B", "C"], cl.changes[0].meta.keys ) # A2 + B0 + C1
+    assert_equal(["A", "B", "C"], cl.changes[0].meta.keys) # A2 + B0 + C1
 
     # assert_equal(1, cl.meta.A?.count)
 

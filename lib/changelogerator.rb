@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require "pry"
 
 # A small wrapper class for more easily generating and manipulating Github/Git
@@ -58,7 +59,7 @@ class Changelog
         meta[meta_key][:min] = current[:value] if !meta[meta_key][:min] || current[:value] < meta[meta_key][:min]
         meta[meta_key][:max] = current[:value] if !meta[meta_key][:max] || current[:value] > meta[meta_key][:max]
         meta[meta_key][:count] = 0 if !meta[meta_key][:count]
-        meta[meta_key][:count]  += 1
+        meta[meta_key][:count] += 1
       end
     end
   end
@@ -198,10 +199,10 @@ class Changelog
   # Prepend the repo if @prefix is true
   def prettify_title(pull)
     pull[:pretty_title] = if @prefix
-        "#{pull[:title]} (#{@repo}##{pull[:number]})"
-      else
-        "#{pull[:title]} (##{pull[:number]})"
-      end
+                            "#{pull[:title]} (#{@repo}##{pull[:number]})"
+                          else
+                            "#{pull[:title]} (##{pull[:number]})"
+                          end
     pull
   end
 

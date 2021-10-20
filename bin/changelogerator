@@ -53,6 +53,7 @@ def validate
   raise "Missing value for the 'repo' field" unless @options[:repo]
   raise "Missing value for the 'from' field" unless @options[:from]
   raise "Missing value for the 'to' field" unless @options[:to]
+
   # p "from: %s" % [@options.from]
   true
 end
