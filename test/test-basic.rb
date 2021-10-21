@@ -15,8 +15,8 @@ class TestChangelogerator < Test::Unit::TestCase
     j = cl.to_json
     assert_equal(1, cl.changes.length)
     puts "JSON Length: %d" % [j.length]
-    assert(j.length > 4_900)
-    assert(j.length < 5_000)
+    assert(j.length > 4_600)
+    assert(j.length < 4_700)
   end
 
   def test_polkadot_many_commits

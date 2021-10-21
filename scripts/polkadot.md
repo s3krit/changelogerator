@@ -38,7 +38,7 @@ This release contains the changes between {{ env.REF1 }} and {{ env.REF2 }}.
 ## Runtimes
 
 {%- for runtime in srtool %}
-- {{ runtime.name }}:
+- {{ runtime.name | capitalize }}:
     - Metadata: `V{{runtime.data.runtimes.compressed.subwasm.metadata_version }}`
     - Size: `{{runtime.data.runtimes.compressed.subwasm.size | filesizeformat }}`
     - Version: `{{runtime.data.runtimes.compressed.subwasm.core_version }}`
@@ -50,8 +50,8 @@ This release contains the changes between {{ env.REF1 }} and {{ env.REF2 }}.
 
 This release was tested against the following versions of `rustc`. Other versions may work.
 
-- Rust Stable: {{ env.RUST_STABLE }}
-- Rust Nightly: {{ env.RUST_NIGHTLY }}
+- Rust Stable: `{{ env.RUST_STABLE }}`
+- Rust Nightly: `{{ env.RUST_NIGHTLY }}`
 
 {# B5 #}
 {# --------------------------- #}
