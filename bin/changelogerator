@@ -10,8 +10,8 @@ require "logger"
 }
 
 logger = Logger.new(STDOUT)
-logger.debug("Starting")
 logger.level = Logger::WARN
+logger.debug("Starting")
 
 OptionParser.new do |opts|
   opts.banner = "

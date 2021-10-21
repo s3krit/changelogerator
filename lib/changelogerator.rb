@@ -16,23 +16,9 @@ class Changelog
   attr_accessor :meta
   attr_reader :label
 
-  # @labels = []
-
   # class << self
   #   attr_reader :labels
   # end
-
-  # Return highest priority from an array of changes
-  # WARNING: This is NOT the actual Changelog object
-  def self.highest_priority_for_changes(changes)
-    # TODO: replace the behavior
-
-    # @labels.find do |p|
-    #   p[:label] == changes.map do |change|
-    #     change[:label][:label]
-    #   end.max
-    # end || @labels[0]
-  end
 
   def self.changes_with_label(changes, label)
     changes.select do |change|
@@ -63,10 +49,6 @@ class Changelog
       end
     end
   end
-
-  # def self.add_label(label)
-  #   @labels.append(label)
-  # end
 
   # Return the list of all the files in the changeset
   # that also in the given path
@@ -112,11 +94,6 @@ class Changelog
     end
 
     compute_global_meta()
-
-    # binding.pry
-
-    # add priority to each change
-    # @changes.map { |c| apply_priority_to_change(c) }
   end
 
   def add(change)
@@ -124,7 +101,6 @@ class Changelog
     prettify_title(change)
     changes.prepend(change)
     @meta = compute_global_meta()
-    # changes.prepend(prettify_title(apply_priority_to_change(change)))
   end
 
   # Add a pull request from id
@@ -134,7 +110,6 @@ class Changelog
   end
 
   def to_json
-    # return @changes.map(&:to_h).to_json
     opts = {
       array_nl: "\n",
       object_nl: "\n",
@@ -145,10 +120,8 @@ class Changelog
     obj = @changes
 
     commits = {
-      cl: {
         meta: @meta,
         changes: obj.map(&:to_h),
-      },
     }
 
     # JSON.fast_generate(commits.map(&:to_h), opts)
@@ -173,29 +146,6 @@ class Changelog
 
     change["meta"] = meta
   end
-
-  # def apply_priority_to_change(change)
-  #   obj = {}
-  #   @labels.each do |p|
-  #     has = false
-  #     has = true if change[:labels].any? { |l|
-  #       l[:name] == p[:label]
-  #     }
-
-  #     change[:label] = p if has
-  #     k = p[:label]
-  #     # binding.pry
-
-  #     obj[k] = has
-
-  #     change[:hasKey]= obj
-  #   end
-  #   # Failsafe: add lowest priority if none detected
-  #   # change[:label] ||= @labels[0]
-
-  #   change
-  # end
-
   # Prepend the repo if @prefix is true
   def prettify_title(pull)
     pull[:pretty_title] = if @prefix
