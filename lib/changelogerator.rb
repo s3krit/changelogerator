@@ -12,6 +12,7 @@ class Changelog
   require "git_diff_parser"
   require "json"
 
+  attr_accessor :repository
   attr_accessor :changes
   attr_accessor :meta
   attr_reader :label
@@ -87,6 +88,7 @@ class Changelog
     @gh = Octokit::Client.new(
       access_token: token,
     )
+    @repository = @gh.repository(@repo)
     @prefix = prefix
     @changes = prs_from_ids(pr_ids_from_git_diff(from, to))
     @changes.map do |c|
@@ -121,6 +123,7 @@ class Changelog
 
     commits = {
         meta: @meta,
+        repository: @repository.to_h,
         changes: obj.map(&:to_h),
     }
 

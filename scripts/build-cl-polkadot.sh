@@ -9,7 +9,7 @@ pushd $DIR
 source .env
 
 # call for instance as:
-# ./build-sl.sh paritytech polkadot v0.9.10 v0.9.11
+# ./build-cl.sh paritytech polkadot v0.9.10 v0.9.11
 OWNER=${1:-$OWNER}
 REPO=${2:-polkadot}
 REF1=${3:-$REF1}
