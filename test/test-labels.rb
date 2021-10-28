@@ -17,7 +17,7 @@ class TestChangelogerator < Test::Unit::TestCase
     assert_equal(1, cl.changes.length)
 
     puts "JSON Length: %d" % [j.length]
-    assert(j.length > 4_600)
-    assert(j.length < 4_700)
+    assert(j.length > 12_000)
+    assert(j.length < 13_000)
   end
 end
