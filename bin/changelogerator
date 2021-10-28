@@ -25,7 +25,6 @@ OptionParser.new do |opts|
     @options[:verbose] = v
   end
 
-  #   cli paritytech/polkadot --from <ref1> --to <ref2> [--no-prefix]
   opts.on("-fFROM", "--from=FROM", "From Ref.") do |f|
     @options[:from] = f
   end
@@ -44,9 +43,6 @@ OptionParser.new do |opts|
   end
 end.parse!
 
-# p @options
-# p ARGV
-
 @options[:repo] = ARGV[0]
 
 def validate
@@ -54,7 +50,6 @@ def validate
   raise "Missing value for the 'from' field" unless @options[:from]
   raise "Missing value for the 'to' field" unless @options[:to]
 
-  # p "from: %s" % [@options.from]
   true
 end
 

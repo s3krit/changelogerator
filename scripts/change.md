@@ -10,5 +10,18 @@
 {%- set prio = "" -%}
 {%- endif -%}
 
-[`#{{c.number}}`]({{c.html_url}}) {{ prio }} - {{ c.title | capitalize }}
+{%- if c.meta.D and c.meta.D.value == 1-%}
+{%- set audit = "✅ audtited" -%}
+{%- elif c.meta.D and c.meta.D.value == 2 -%}
+{%- set audit = "✅ trivial" -%}
+{%- elif c.meta.D and c.meta.D.value == 3 -%}
+{%- set audit = "✅ trivial" -%}
+{%- elif c.meta.D and c.meta.D.value == 5 -%}
+{%- set audit = "⏳ pending non-critical audit" -%}
+{%- else -%}
+{%- set audit = "" -%}
+{%- endif -%}
+
+
+{{ audit }} [`#{{c.number}}`]({{c.html_url}}) {{ prio }} - {{ c.title | capitalize }}
 {%- endmacro change %}

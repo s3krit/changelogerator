@@ -17,10 +17,6 @@ class Changelog
   attr_accessor :meta
   attr_reader :label
 
-  # class << self
-  #   attr_reader :labels
-  # end
-
   def self.changes_with_label(changes, label)
     changes.select do |change|
       change[:labels].any? { |c| c[:name] == label } == true
@@ -84,7 +80,6 @@ class Changelog
   # prefix: whether or not to prefix PR numbers with their repo in the changelog
   def initialize(github_repo, from, to, token: "", prefix: nil)
     @repo = github_repo
-    # @labels = labels
     @gh = Octokit::Client.new(
       access_token: token,
     )
@@ -127,7 +122,6 @@ class Changelog
         changes: obj.map(&:to_h),
     }
 
-    # JSON.fast_generate(commits.map(&:to_h), opts)
     JSON.fast_generate(commits, opts)
   end
 
