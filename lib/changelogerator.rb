@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "pry"
+require 'pry'
 
 # A small wrapper class for more easily generating and manipulating Github/Git
 # changelogs. Given two different git objects (sha, tag, whatever), it will
@@ -8,13 +8,11 @@ require "pry"
 # for filtering by label, and the importance of that change (labels), based
 # on how we classify the importance of PRs in the paritytech/polkadot project.
 class Changelog
-  require "octokit"
-  require "git_diff_parser"
-  require "json"
+  require 'octokit'
+  require 'git_diff_parser'
+  require 'json'
 
-  attr_accessor :repository
-  attr_accessor :changes
-  attr_accessor :meta
+  attr_accessor :repository, :changes, :meta
   attr_reader :label
 
   def self.changes_with_label(changes, label)
@@ -25,7 +23,7 @@ class Changelog
 
   # Go through all changes and compute some
   # aggregated values
-  def compute_global_meta()
+  def compute_global_meta
     @meta = {}
 
     @changes.each do |change|
@@ -35,13 +33,13 @@ class Changelog
       change.base = nil
       change._links = nil
 
-      change[:meta].keys.each do |meta_key|
+      change[:meta].each_key do |meta_key|
         current = change[:meta][meta_key]
 
         meta[meta_key] = {} unless meta[meta_key]
         meta[meta_key][:min] = current[:value] if !meta[meta_key][:min] || current[:value] < meta[meta_key][:min]
         meta[meta_key][:max] = current[:value] if !meta[meta_key][:max] || current[:value] > meta[meta_key][:max]
-        meta[meta_key][:count] = 0 if !meta[meta_key][:count]
+        meta[meta_key][:count] = 0 unless meta[meta_key][:count]
         meta[meta_key][:count] += 1
       end
     end
@@ -78,10 +76,10 @@ class Changelog
   # Optional named parameters:
   # token: a Github personal access token
   # prefix: whether or not to prefix PR numbers with their repo in the changelog
-  def initialize(github_repo, from, to, token: "", prefix: nil)
+  def initialize(github_repo, from, to, token: '', prefix: nil)
     @repo = github_repo
     @gh = Octokit::Client.new(
-      access_token: token,
+      access_token: token
     )
     @repository = @gh.repository(@repo)
     @prefix = prefix
@@ -90,14 +88,14 @@ class Changelog
       compute_change_meta(c)
     end
 
-    compute_global_meta()
+    compute_global_meta
   end
 
   def add(change)
     compute_change_meta(change)
     prettify_title(change)
     changes.prepend(change)
-    @meta = compute_global_meta()
+    @meta = compute_global_meta
   end
 
   # Add a pull request from id
@@ -106,20 +104,20 @@ class Changelog
     add pull
   end
 
-  def to_json
+  def to_json(*_args)
     opts = {
       array_nl: "\n",
       object_nl: "\n",
-      indent: "  ",
-      space_before: " ",
-      space: " ",
+      indent: '  ',
+      space_before: ' ',
+      space: ' '
     }
     obj = @changes
 
     commits = {
-        meta: @meta,
-        repository: @repository.to_h,
-        changes: obj.map(&:to_h),
+      meta: @meta,
+      repository: @repository.to_h,
+      changes: obj.map(&:to_h)
     }
 
     JSON.fast_generate(commits, opts)
@@ -129,20 +127,21 @@ class Changelog
 
   # Compute and attach metadata about one change
   def compute_change_meta(change)
-    meta = Hash.new
+    meta = {}
 
     change.labels.each do |label|
       letter, number, text = self.class.get_label_code(label.name)
-      if letter && number
-        meta[letter] = {
-          value: number.to_i,
-          text: text,
-        }
-      end
+      next unless letter && number
+
+      meta[letter] = {
+        value: number.to_i,
+        text: text
+      }
     end
 
-    change["meta"] = meta
+    change['meta'] = meta
   end
+
   # Prepend the repo if @prefix is true
   def prettify_title(pull)
     pull[:pretty_title] = if @prefix
@@ -165,7 +164,7 @@ class Changelog
   def prs_from_ids(ids)
     batch_size = 100
     prs = []
-    @gh.pulls(@repo, state: "closed", per_page: batch_size)
+    @gh.pulls(@repo, state: 'closed', per_page: batch_size)
     cur_batch = @gh.last_response
     until ids.empty?
       prs += cur_batch.data.select { |pr| ids.include? pr.number }

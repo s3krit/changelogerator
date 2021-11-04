@@ -1,17 +1,19 @@
 #!/usr/bin/env ruby
 
-require "optparse"
-require_relative "../lib/changelogerator"
-require "logger"
+# frozen_string_literal: true
+
+require 'optparse'
+require_relative '../lib/changelogerator'
+require 'logger'
 
 @options = {
   from: nil,
-  to: nil,
+  to: nil
 }
 
-logger = Logger.new(STDOUT)
+logger = Logger.new($stdout)
 logger.level = Logger::WARN
-logger.debug("Starting")
+logger.debug('Starting')
 
 OptionParser.new do |opts|
   opts.banner = "
@@ -21,23 +23,23 @@ OptionParser.new do |opts|
   Usage:
   changelogerator [options]"
 
-  opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
+  opts.on('-v', '--[no-]verbose', 'Run verbosely') do |v|
     @options[:verbose] = v
   end
 
-  opts.on("-fFROM", "--from=FROM", "From Ref.") do |f|
+  opts.on('-fFROM', '--from=FROM', 'From Ref.') do |f|
     @options[:from] = f
   end
 
-  opts.on("-tTO", "--to=TO", "To Ref.") do |t|
+  opts.on('-tTO', '--to=TO', 'To Ref.') do |t|
     @options[:to] = t
   end
 
-  opts.on("-p", "--[no-]prefix", "Add (or not) a prefix for the repo") do |p|
+  opts.on('-p', '--[no-]prefix', 'Add (or not) a prefix for the repo') do |p|
     @options[:prefix] = p
   end
 
-  opts.on("-h", "--help", "Prints this help") do
+  opts.on('-h', '--help', 'Prints this help') do
     puts opts
     exit
   end
@@ -55,17 +57,17 @@ end
 
 exit 1 unless validate
 
-logger.debug("Validation passed")
-logger.debug(" - repo: %s" % [@options[:repo]])
-logger.debug(" - from: %s" % [@options[:from]])
-logger.debug(" - to: %s" % [@options[:to]])
+logger.debug('Validation passed')
+logger.debug(format(' - repo: %s', @options[:repo]))
+logger.debug(format(' - from: %s', @options[:from]))
+logger.debug(format(' - to: %s', @options[:to]))
 
 cl = Changelog.new(
   @options[:repo],
   @options[:from],
   @options[:to],
-  token: ENV["GITHUB_TOKEN"],
-  prefix: @options[:prefix],
+  token: ENV['GITHUB_TOKEN'],
+  prefix: @options[:prefix]
 )
 
 puts cl.to_json
