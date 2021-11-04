@@ -21,7 +21,7 @@ OptionParser.new do |opts|
   between 2 references on your Github project.
 
   Usage:
-  changelogerator [options]"
+  changelogerator <repo> [options]"
 
   opts.on('-v', '--[no-]verbose', 'Run verbosely') do |v|
     @options[:verbose] = v
