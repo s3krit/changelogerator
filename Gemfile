@@ -4,10 +4,20 @@ source 'https://rubygems.org'
 
 git_source(:github) { |repo_name| "https://github.com/#{repo_name}" }
 
-gem "octokit", "~> 4"
+gem 'octokit', '~> 4'
 
-gem "pry", "~> 0.13.1", :group => :dev
+gem 'pry', '~> 0.13.1', group: :dev
 
-gem "git_diff_parser", "~> 3"
+gem 'git_diff_parser', '~> 3'
 
-gem "pry-doc", "~> 1.1", :group => :dev
+gem 'pry-doc', '~> 1.1', group: :dev
+
+gem 'rake', group: :dev
+
+gem 'test-unit', group: :dev
+
+gem 'optparse', '~> 0.1.1'
+
+gem 'logger', '~> 1.4'
+
+gem 'rubocop', group: :dev, require: false

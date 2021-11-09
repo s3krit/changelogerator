@@ -1,54 +1,19 @@
 # frozen_string_literal: true
 
+require 'pry'
+
 # A small wrapper class for more easily generating and manipulating Github/Git
 # changelogs. Given two different git objects (sha, tag, whatever), it will
 # find all PRs that made up that diff and store them as a list. Also allows
-# for filtering by label, and the importance of that change (priorities), based
+# for filtering by label, and the importance of that change (labels), based
 # on how we classify the importance of PRs in the paritytech/polkadot project.
-# Probably not tremendously useful to other projects.
 class Changelog
   require 'octokit'
   require 'git_diff_parser'
+  require 'json'
 
-  attr_accessor :changes
-  attr_reader :priority
-
-  @priorities = [
-    {
-      priority: 1,
-      label: 'C1-low 📌',
-      text: 'Upgrade priority: **Low** (upgrade at your convenience)'
-    },
-    {
-      priority: 3,
-      label: 'C3-medium 📣',
-      text: 'Upgrade priority: **Medium** (timely upgrade recommended)'
-    },
-    {
-      priority: 7,
-      label: 'C7-high ❗️',
-      text: 'Upgrade priority:❗ **HIGH** ❗ Please upgrade your node as soon as possible'
-    },
-    {
-      priority: 9,
-      label: 'C9-critical ‼️',
-      text: 'Upgrade priority: ❗❗ **URGENT** ❗❗ PLEASE UPGRADE IMMEDIATELY'
-    }
-  ]
-
-  class << self
-    attr_reader :priorities
-  end
-
-  # Return highest priority from an array of changes (NOT the actual Changelog
-  # object)
-  def self.highest_priority_for_changes(changes)
-    @priorities.find do |p|
-      p[:priority] == changes.map do |change|
-        change[:priority][:priority]
-      end.max
-    end || @priorities[0]
-  end
+  attr_accessor :repository, :changes, :meta
+  attr_reader :label
 
   def self.changes_with_label(changes, label)
     changes.select do |change|
@@ -56,11 +21,49 @@ class Changelog
     end
   end
 
+  # Go through all changes and compute some
+  # aggregated values
+  def compute_global_meta
+    @meta = {}
+
+    @changes.each do |change|
+      # here we remove some of the fields to reduce (considerably) the size
+      # of the json output
+      change.head = nil
+      change.base = nil
+      change._links = nil
+
+      change[:meta].each_key do |meta_key|
+        current = change[:meta][meta_key]
+
+        meta[meta_key] = {} unless meta[meta_key]
+        meta[meta_key][:min] = current[:value] if !meta[meta_key][:min] || current[:value] < meta[meta_key][:min]
+        meta[meta_key][:max] = current[:value] if !meta[meta_key][:max] || current[:value] > meta[meta_key][:max]
+        meta[meta_key][:count] = 0 unless meta[meta_key][:count]
+        meta[meta_key][:count] += 1
+      end
+    end
+  end
+
+  # Return the list of all the files in the changeset
+  # that also in the given path
   def self.changes_files_in_paths?(change, paths)
     changed_files = GitDiffParser.parse(Octokit.get(change.diff_url)).files
     paths = [paths] unless paths.is_a? Array
     paths.each do |path|
       return true if changed_files.find { |l| l.match path }
+    end
+    nil
+  end
+
+  # Return the label code for a change
+  # if the label name matches the expected pattern.
+  # nil otherwise.
+  def self.get_label_code(name)
+    m = match = name.match(/^([a-z])(\d+)-(.*)$/i)
+    if m
+      letter, number, text = match.captures
+      return [letter, number, text]
     end
     nil
   end
@@ -76,44 +79,71 @@ class Changelog
   # prefix: whether or not to prefix PR numbers with their repo in the changelog
   def initialize(github_repo, from, to, token: '', prefix: nil)
     @repo = github_repo
-    @priorities = self.class.priorities
     @gh = Octokit::Client.new(
       access_token: token
     )
+    @repository = @gh.repository(@repo)
     @prefix = prefix
     @changes = prs_from_ids(pr_ids_from_git_diff(from, to))
-    # add priority to each change
-    @changes.map { |c| apply_priority_to_change(c) }
-  end
+    @changes.map do |c|
+      compute_change_meta(c)
+    end
 
-  def changes_with_label(label)
-    self.class.changes_with_label(@changes, label)
-  end
-
-  def runtime_changes?
-    nil
+    compute_global_meta
   end
 
   def add(change)
-    changes.prepend(prettify_title(apply_priority_to_change(change)))
+    compute_change_meta(change)
+    prettify_title(change)
+    changes.prepend(change)
+    @meta = compute_global_meta
   end
 
+  # Add a pull request from id
   def add_from_id(id)
     pull = @gh.pull_request(@repo, id)
     add pull
   end
 
-  private
+  def to_json(*_args)
+    opts = {
+      array_nl: "\n",
+      object_nl: "\n",
+      indent: '  ',
+      space_before: ' ',
+      space: ' '
+    }
+    obj = @changes
 
-  def apply_priority_to_change(change)
-    @priorities.each do |p|
-      change[:priority] = p if change[:labels].any? { |l| l[:name] == p[:label] }
-    end
-    # Failsafe: add lowest priority if none detected
-    change[:priority] ||= @priorities[0]
-    change
+    commits = {
+      meta: @meta,
+      repository: @repository.to_h,
+      changes: obj.map(&:to_h)
+    }
+
+    JSON.fast_generate(commits, opts)
   end
 
+  private
+
+  # Compute and attach metadata about one change
+  def compute_change_meta(change)
+    meta = {}
+
+    change.labels.each do |label|
+      letter, number, text = self.class.get_label_code(label.name)
+      next unless letter && number
+
+      meta[letter] = {
+        value: number.to_i,
+        text: text
+      }
+    end
+
+    change['meta'] = meta
+  end
+
+  # Prepend the repo if @prefix is true
   def prettify_title(pull)
     pull[:pretty_title] = if @prefix
                             "#{pull[:title]} (#{@repo}##{pull[:number]})"
