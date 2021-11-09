@@ -34,7 +34,7 @@ task install: :build do
 end
 
 # Publish the gem
-task :publish => [:build] do
+task publish: [:build] do
   sh format('gem push ./%s', gem_name)
 end
 
