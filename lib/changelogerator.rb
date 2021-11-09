@@ -84,8 +84,8 @@ class Changelog
     )
     @repository = @gh.repository(@repo)
     @prefix = prefix
-    prs = pr_ids_from_git_diff(from, to)
-    @changes = prs_from_ids(prs)
+    ids = pr_ids_from_git_diff(from, to)
+    @changes = prs_from_ids(ids)
     @changes.map do |c|
       compute_change_meta(c)
     end
