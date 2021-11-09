@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = 'changelogerator'
-  s.version = '0.9.0'
+  s.version = '0.9.1'
   s.executable << 'changelogerator'
   s.summary = 'Changelog generation/management'
   s.description = 'Simple helper class for paritytech/polkadot changelogs'
-  s.authors = ['Martin Pugh']
+  s.authors = ['Martin Pugh', 'Wilfried Kopp']
   s.files = ['lib/changelogerator.rb']
   s.license = 'AGPL-3.0'
   s.homepage = 'https://github.com/s3krit/changelogerator'
