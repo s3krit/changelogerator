@@ -30,7 +30,7 @@ jobs:
         run: rubocop
 
       - name: Run tests
-        run: bundle exec rake
+        run: bundle exec rake test
 
       - name: Build
         run: gem build changelogerator.gemspec --output=changelogerator.gem
