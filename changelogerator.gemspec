@@ -3,7 +3,6 @@
 Gem::Specification.new do |s|
   s.name = 'changelogerator'
   s.version = '0.9.0'
-  s.date = '2021-06-25'
   s.executable << 'changelogerator'
   s.summary = 'Changelog generation/management'
   s.description = 'Simple helper class for paritytech/polkadot changelogs'

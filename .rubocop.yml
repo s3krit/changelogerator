@@ -4,7 +4,7 @@ Lint/Debugger:
   Enabled: false
 Metrics/MethodLength:
   Enabled: false
-Metrics/LineLength:
+Layout/LineLength:
   Enabled: false
 Metrics/AbcSize:
   Enabled: false
@@ -12,6 +12,7 @@ Metrics/ClassLength:
   Enabled: false
 AllCops:
   TargetRubyVersion: 2.7
+  NewCops: enable
 Metrics/PerceivedComplexity:
   Max: 9
 Metrics/CyclomaticComplexity:
