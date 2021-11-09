@@ -14,14 +14,14 @@ jobs:
 
     strategy:
       matrix:
-        ruby-version: [2.7.x, head]
+        ruby_version: [2.7.x, head]
 
     steps:
       - uses: actions/checkout@v2
       - name: Set up Ruby
         uses: ruby/setup-ruby@477b21f02be01bcb8030d50f37cfec92bfa615b6
         with:
-          ruby-version: 2.7
+          ruby_version: 2.7
 
       - name: Install dependencies
         run: bundle install --with=dev
@@ -31,3 +31,16 @@ jobs:
 
       - name: Run tests
         run: bundle exec rake
+
+      - name: Build
+        run: gem build changelogerator.gemspec --output=changelogerator.gem
+
+      - name: Test install
+        run: gem install ./changelogerator.gem
+
+      - name: Save Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: gem-${{ matrix.ruby_version }}
+          path: |
+            changelogerator.gem
