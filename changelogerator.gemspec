@@ -13,4 +13,5 @@ Gem::Specification.new do |s|
   s.homepage = 'https://github.com/s3krit/changelogerator'
   s.add_runtime_dependency 'git_diff_parser', '~> 3'
   s.add_runtime_dependency 'octokit', '~> 4'
+  s.required_ruby_version = '2.7'
 end

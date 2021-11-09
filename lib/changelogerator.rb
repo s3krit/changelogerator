@@ -60,7 +60,8 @@ class Changelog
   # if the label name matches the expected pattern.
   # nil otherwise.
   def self.get_label_code(name)
-    if match = name.match(/^([a-z])(\d+)-(.*)$/i)
+    m = match = name.match(/^([a-z])(\d+)-(.*)$/i)
+    if m
       letter, number, text = match.captures
       return [letter, number, text]
     end

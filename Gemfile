@@ -19,3 +19,5 @@ gem 'test-unit', group: :dev
 gem 'optparse', '~> 0.1.1'
 
 gem 'logger', '~> 1.4'
+
+gem 'rubocop', group: :dev, require: false
