@@ -84,7 +84,8 @@ class Changelog
     )
     @repository = @gh.repository(@repo)
     @prefix = prefix
-    @changes = prs_from_ids(pr_ids_from_git_diff(from, to))
+    prs = pr_ids_from_git_diff(from, to)
+    @changes = prs_from_ids(prs)
     @changes.map do |c|
       compute_change_meta(c)
     end
@@ -154,11 +155,13 @@ class Changelog
   end
 
   def pr_ids_from_git_diff(from, to)
-    @gh.compare(@repo, from, to).commits.map do |c|
+    commits = @gh.compare(@repo, from, to).commits
+    commits.map do |c|
       title = c.commit.message.split("\n\n").first
-      next unless title =~ /\(#[0-9]+\)$/
+      regex = /.*#([0-9]+).*$/
+      next unless title =~ regex
 
-      title.gsub(/.*#([0-9]+)\)$/, '\1')
+      title.gsub(regex, '\1')
     end.compact.map(&:to_i)
   end
 
