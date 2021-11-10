@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'pry'
-
 # A small wrapper class for more easily generating and manipulating Github/Git
 # changelogs. Given two different git objects (sha, tag, whatever), it will
 # find all PRs that made up that diff and store them as a list. Also allows
