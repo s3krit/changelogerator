@@ -16,8 +16,7 @@ logger.level = Logger::WARN
 logger.debug('Starting')
 
 OptionParser.new do |opts|
-  opts.banner = "
-  Changelogerator helps you generate a template friendly context made of the changes
+  opts.banner = "Changelogerator helps generate a template friendly context made of the changes
   between 2 references on your Github project.
 
   Usage:

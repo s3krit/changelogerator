@@ -2,14 +2,13 @@
 
 Gem::Specification.new do |s|
   s.name = 'changelogerator'
-  s.version = '0.9.0'
+  s.version = '0.9.1'
+  s.summary = 'Changelog generation/management'
+  s.authors = ['Martin Pugh', 'Wilfried Kopp']
   s.files = ['lib/changelogerator.rb', 'bin/changelogerator']
   s.test_files = s.files.grep(%r{^(test|spec|features)/})
-
   s.executables = s.files.grep(%r{^bin/}) { |f| File.basename(f) }
-  s.summary = 'Changelog generation/management'
   s.description = 'A utility to fetch the data required to generate a changelog based on change in Github and formatted labels.'
-  s.authors = ['Martin Pugh']
   s.require_paths = ['lib']
   s.license = 'AGPL-3.0'
   s.homepage = 'https://github.com/s3krit/changelogerator'
