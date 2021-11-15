@@ -16,11 +16,13 @@ logger.level = Logger::WARN
 logger.debug('Starting')
 
 OptionParser.new do |opts|
-  opts.banner = "Changelogerator helps generate a template friendly context made of the changes
-  between 2 references on your Github project.
+  opts.banner = 'Changelogerator
+
+This utility helps generate a template friendly context made
+of the changes between 2 references on your Github project.
 
   Usage:
-  changelogerator <repo> [options]"
+  changelogerator <repo> [options]'
 
   opts.on('-v', '--[no-]verbose', 'Run verbosely') do |v|
     @options[:verbose] = v
