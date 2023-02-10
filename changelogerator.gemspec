@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = 'changelogerator'
-  s.version = '0.9.1'
+  s.version = '0.10.0'
   s.summary = 'Changelog generation/management'
   s.authors = ['Martin Pugh', 'Wilfried Kopp']
   s.files = ['lib/changelogerator.rb', 'bin/changelogerator']
