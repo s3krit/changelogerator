@@ -76,13 +76,12 @@ class Changelog
       change._links = nil
 
       change[:meta].each_key do |meta_key|
-        current = change[:meta][meta_key]
+        aggregate = change[:meta][meta_key]['agg']
 
         meta[meta_key] = {} unless meta[meta_key]
-        meta[meta_key][:min] = current[:value] if !meta[meta_key][:min] || current[:value] < meta[meta_key][:min]
-        meta[meta_key][:max] = current[:value] if !meta[meta_key][:max] || current[:value] > meta[meta_key][:max]
-        meta[meta_key][:count] = 0 unless meta[meta_key][:count]
-        meta[meta_key][:count] += 1
+        meta[meta_key][:min] = aggregate['min'] if !meta[meta_key][:min] || aggregate[:min] < meta[meta_key]['min']
+        meta[meta_key][:max] = aggregate['max'] if !meta[meta_key][:max] || aggregate[:max] > meta[meta_key]['max']
+        meta[meta_key][:count] += aggregate['count']
       end
     end
   end
