@@ -2,27 +2,61 @@
 
 require 'json'
 require_relative '../lib/changelogerator'
+require_relative './utils'
 require 'test/unit'
 
 class TestChangelogerator < Test::Unit::TestCase
   def test_meta_1_commit
-    ref1 = '2ebabcec7fcbb3d13a965a852df0559a4aa12a5e'
-    ref2 = '9c05f9753b2f939ccf5ba18c08dd4c83c3ab9e0b'
+    change = Change.new(%w[A1-foo A2-foo B0-foo B1-foo B2-foo])
+    compute_change_meta(change)
 
-    cl = Changelog.new(
-      'paritytech/polkadot', ref1, ref2,
-      token: ENV['GITHUB_TOKEN'],
-      prefix: true
-    )
+    p change.meta.to_json
 
-    j = cl.to_json
-    assert_equal(1, cl.changes.length)
-    assert_equal(%w[A B C], cl.changes[0].meta.keys) # A2 + B0 + C1
+    assert_equal(%w[A B], change.meta.keys)
 
-    p cl.meta
+    assert_equal(change.meta['A']['agg']['min'], 1) # A(1)
+    assert_equal(change.meta['A']['agg']['max'], 2) # A(2)
+    assert_equal(change.meta['A']['agg']['count'], 2) # A1 + A2
 
-    puts format('JSON Length: %d', j.length)
-    assert(j.length > 11_000)
-    assert(j.length < 13_000)
+    assert_equal(change.meta['B']['agg']['min'], 0) # B(0)
+    assert_equal(change.meta['B']['agg']['max'], 2) # B(2)
+    assert_equal(change.meta['B']['agg']['count'], 3) # B0 + B1 + B2
+
+    assert_equal(JSON.pretty_generate(change.meta), '{
+  "A": {
+    "agg": {
+      "count": 2,
+      "max": 2,
+      "min": 1
+    },
+    "A1": {
+      "value": 1,
+      "text": "foo"
+    },
+    "A2": {
+      "value": 2,
+      "text": "foo"
+    }
+  },
+  "B": {
+    "agg": {
+      "count": 3,
+      "max": 2,
+      "min": 0
+    },
+    "B0": {
+      "value": 0,
+      "text": "foo"
+    },
+    "B1": {
+      "value": 1,
+      "text": "foo"
+    },
+    "B2": {
+      "value": 2,
+      "text": "foo"
+    }
+  }
+}')
   end
 end

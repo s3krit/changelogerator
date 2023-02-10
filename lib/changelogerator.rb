@@ -1,5 +1,49 @@
 # frozen_string_literal: true
 
+# Return the label code for a change
+# if the label name matches the expected pattern.
+# nil otherwise.
+def parse_change_label(name)
+  m = match = name.match(/^([a-z])(\d+)-(.*)$/i)
+  return nil unless m
+
+  letter, digits, text = match.captures
+  number = digits.to_i
+  [letter, number, text]
+end
+
+def compute_change_meta(change)
+  meta = {}
+
+  change.labels.each do |label|
+    letter, number, text = parse_change_label(label.name)
+
+    next unless letter && number
+
+    if meta.key?(letter)
+      aggregate = meta[letter]['agg']
+      aggregate['max'] = number if number > aggregate['max']
+      aggregate['min'] = number if number < aggregate['min']
+      aggregate['count'] += 1
+    else
+      meta[letter] = {
+        'agg' => {
+          'count' => 1,
+          'max' => number,
+          'min' => number
+        }
+      }
+    end
+
+    meta[letter]["#{letter}#{number}"] = {
+      'value' => number,
+      'text' => text
+    }
+  end
+
+  change['meta'] = meta
+end
+
 # A small wrapper class for more easily generating and manipulating Github/Git
 # changelogs. Given two different git objects (sha, tag, whatever), it will
 # find all PRs that made up that diff and store them as a list. Also allows
@@ -50,18 +94,6 @@ class Changelog
     paths = [paths] unless paths.is_a? Array
     paths.each do |path|
       return true if changed_files.find { |l| l.match path }
-    end
-    nil
-  end
-
-  # Return the label code for a change
-  # if the label name matches the expected pattern.
-  # nil otherwise.
-  def self.get_label_code(name)
-    m = match = name.match(/^([a-z])(\d+)-(.*)$/i)
-    if m
-      letter, number, text = match.captures
-      return [letter, number, text]
     end
     nil
   end
@@ -124,23 +156,6 @@ class Changelog
   end
 
   private
-
-  # Compute and attach metadata about one change
-  def compute_change_meta(change)
-    meta = {}
-
-    change.labels.each do |label|
-      letter, number, text = self.class.get_label_code(label.name)
-      next unless letter && number
-
-      meta[letter] = {
-        value: number.to_i,
-        text: text
-      }
-    end
-
-    change['meta'] = meta
-  end
 
   # Prepend the repo if @prefix is true
   def prettify_title(pull)
