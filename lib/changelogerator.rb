@@ -78,10 +78,17 @@ class Changelog
       change[:meta].each_key do |meta_key|
         aggregate = change[:meta][meta_key]['agg']
 
-        meta[meta_key] = {} unless meta[meta_key]
-        meta[meta_key][:min] = aggregate['min'] if !meta[meta_key][:min] || aggregate[:min] < meta[meta_key]['min']
-        meta[meta_key][:max] = aggregate['max'] if !meta[meta_key][:max] || aggregate[:max] > meta[meta_key]['max']
-        meta[meta_key][:count] += aggregate['count']
+        if meta[meta_key]
+          meta[meta_key][:min] = aggregate['min'] if aggregate['min'] < meta[meta_key][:min]
+          meta[meta_key][:max] = aggregate['max'] if aggregate['max'] > meta[meta_key][:max]
+          meta[meta_key][:count] += aggregate['count']
+        else
+          meta[meta_key] = {
+            min: aggregate['min'],
+            max: aggregate['max'],
+            count: aggregate['count']
+          }
+        end
       end
     end
   end
