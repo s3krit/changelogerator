@@ -10,8 +10,6 @@ class TestChangelogerator < Test::Unit::TestCase
     change = Change.new(%w[A1-foo A2-foo B0-foo B1-foo B2-foo])
     compute_change_meta(change)
 
-    p change.meta.to_json
-
     assert_equal(%w[A B], change.meta.keys)
 
     assert_equal(change.meta['A']['agg']['min'], 1) # A(1)
