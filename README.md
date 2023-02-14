@@ -88,16 +88,14 @@ Here is an example:
 
 ```
 jq \
-    --slurpfile srtool_kusama kusama-srtool-digest.json \
-    --slurpfile srtool_polkadot polkadot-srtool-digest.json \
-    --slurpfile polkadot polkadot.json \
-    --slurpfile substrate substrate.json \
+    --slurpfile foo.json \
+    --slurpfile bar.json \
     -n '{
-        polkadot: $polkadot[0],
-        substrate: $substrate[0],
-        srtool: [
-            { name: "kusama", data: $srtool_kusama[0] },
-            { name: "polkadot", data: $srtool_polkadot[0] }
+        foo: $foo[0],
+        bar: $bar[0],
+        foobar: [
+            { age: 12 },
+            { name: "bob" }
         ] }' | tee context.json
 ```
 
