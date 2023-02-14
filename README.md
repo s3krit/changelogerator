@@ -1,23 +1,24 @@
 # Changelog-erator :)
 
-This utility is written in Ruby. It uses the Octokit gem to connect to:
+This utility is written in Ruby. It uses the [Octokit](https://github.com/octokit) gem to:
 - connect to Github
 - retrieve the list of changes between 2 references
 
-While 0.x versions were rather specific to the [Polkadot](https://github.com/paritytech/polkadot) repository, those limitations have been removed starting with 0.9.x versions.
+While `0.x` versions were rather specific to the [Polkadot](https://github.com/paritytech/polkadot) repository, those limitations have been removed starting with `0.9.x` versions.
 
 The only requirement if you want to benefit from filtering labels in a better way that just comparing label names if to name your labels using the following generic pattern as see [here](https://github.com/paritytech/polkadot/labels):
 
-`<letter><number(s)>-<arbitrary text>`
+`<letter><number(s)>[-<arbitrary text>]`
 
 For instance:
 
 - `B0-Silent 😎`
 - `C1-Important ❗️`
+- `Z12`
 
-Each of your issues or PR can have any number of labels but you should avoid having multiple labels of the same category. For instance, you do not want to have both `B0` and `B7`.
+Each of your issues or PR can have any number of labels. Advanced rules for labels can be defined and enforced using [ruled_labels](https://github.com/chevdor/ruled_labels).
 
-Running the `changelogerator` will fetch all your changes from Github. You should set a value for the ENV `GITHUB_TOKEN` if you want to avoid being rate limited.
+Running `changelogerator` will fetch all the changes for a given repository from Github. You should set a value for the ENV `GITHUB_TOKEN` if you want to avoid being rate limited.
 
 The produce json will be formatted as:
 ```
@@ -99,3 +100,9 @@ jq \
             { name: "polkadot", data: $srtool_polkadot[0] }
         ] }' | tee context.json
 ```
+
+## Dev notes
+
+- install: `bundle install`
+- test: `rake test` (some of the test appear to be UN responding for a good minute, see how to set `GITHUB_TOKEN` above to speed things up)
+- linting/formatting: `rubocop`
