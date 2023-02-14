@@ -20,34 +20,61 @@ Each of your issues or PR can have any number of labels but you should avoid hav
 Running the `changelogerator` will fetch all your changes from Github. You should set a value for the ENV `GITHUB_TOKEN` if you want to avoid being rate limited.
 
 The produce json will be formatted as:
-```
+
+```jsonc
 {
-    "cl": {
-        "meta": {
+    "polkadot": {
+        "meta": { // top-level metadata which aggregates the info for .changes[].meta
             "C": {
-                "min": 3,
-                "max": 9,
-                "count": 3
-            }, ...
+                "min": 1,
+                "max": 1,
+                "count": 1
+            },
+            "D": {
+                "min": 2,
+                "max": 2,
+                "count": 1
+            }
         },
-        "repository" : {
-            "id" : 42,
-            "node_id" : "...",
-            "name" : "polkadot",
-            ...
+        "repository": {
+          /*
+            Includes the fields from the GitHub Repositories REST API
+            See https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#get-a-repository
+          */
         },
         "changes": [
+            /*
+            Each entry corresponds to a pull request with the fields from the GitHub PR Rest API
+            See https://docs.github.com/en/rest/pulls/pulls?apiVersion=2022-11-28#get-a-pull-request
+            In addition to the API fields, each entry has a "meta" field with
+            information computed from its labels.
+            */
             {
                 "meta": {
                     "C": {
-                        "value": 7
+                        "C1": {
+                          "value": 1,
+                          "text": "needs-audit"
+                        },
+                        "agg": {
+                          "min": 1,
+                          "max": 1,
+                          "count": 1
+                        }
                     },
-                    "D": { "value": 8 }
-                },
-                ... Github information ...
-                "number": 1234,
-                ... way more information about the commit
-                ... coming from Github
+                    "D": {
+                        "D2": {
+                          "value": 2,
+                          "text": "runtime"
+                        },
+                        "agg": {
+                          "min": 2,
+                          "max": 2,
+                          "count": 1
+                        }
+                    }
+                }
+                // ... other fields from the REST API
             }
         ]
     }
