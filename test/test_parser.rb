@@ -80,4 +80,10 @@ class TestParser < Test::Unit::TestCase
     assert_equal(2, lbl.number)
     assert_equal('foo Bar', lbl.description)
   end
+
+  def test_case_no_label
+    assert_raises InvalidLabel, 'xxx' do
+      Label.new('123-foo')
+    end
+  end
 end

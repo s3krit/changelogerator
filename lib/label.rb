@@ -17,9 +17,12 @@ class Label
 
   def initialize(input)
     p = parse(input)
+    raise InvalidLabel, 'Invalid label' unless p
 
     @code = p[0].upcase
     @number = p[1]
     @description = p[2] unless p[2].empty?
   end
 end
+
+class InvalidLabel < StandardError; end
