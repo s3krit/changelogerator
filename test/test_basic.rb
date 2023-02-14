@@ -6,8 +6,9 @@ require 'test/unit'
 
 class TestChangelogerator < Test::Unit::TestCase
   def setup
-    omit("Skipping because $GITHUB_TOKEN=#{ENV['GITHUB_TOKEN']}") if ENV['GITHUB_TOKEN'] == 'disabled'
-    raise 'Missing $GITHUB_TOKEN token' if (ENV['GITHUB_TOKEN']).empty?
+    gh_token = ENV['GITHUB_TOKEN']
+    omit("Skipping because $GITHUB_TOKEN=#{gh_token}") if gh_token == 'disabled'
+    raise 'Missing $GITHUB_TOKEN token' if gh_token.nil? || gh_token.empty?
   end
 
   def test_polkadot_1_commit
