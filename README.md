@@ -28,8 +28,8 @@ The produce json will be formatted as:
         "meta": { // top-level metadata which aggregates the info for .changes[].meta
             "C": {
                 "min": 1,
-                "max": 1,
-                "count": 1
+                "max": 3,
+                "count": 2
             },
             "D": {
                 "min": 2,
@@ -39,39 +39,44 @@ The produce json will be formatted as:
         },
         "repository": {
           /*
-            Includes the fields from the GitHub Repositories REST API
-            See https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#get-a-repository
+            Includes the fields from the GitHub Repositories REST API.
+            See: https://docs.github.com/en/rest/repos/repos#get-a-repository
           */
         },
         "changes": [
             /*
-            Each entry corresponds to a pull request with the fields from the GitHub PR Rest API
-            See https://docs.github.com/en/rest/pulls/pulls?apiVersion=2022-11-28#get-a-pull-request
+            Each entry corresponds to a pull request with the fields from the
+            GitHub PR Rest API.
+            See: https://docs.github.com/en/rest/pulls/pulls#get-a-pull-request
             In addition to the API fields, each entry has a "meta" field with
             information computed from its labels.
             */
             {
                 "meta": {
                     "C": {
-                        "C1": {
+                        "C1": { // parsed from C1-needs_audit
                           "value": 1,
-                          "text": "needs-audit"
+                          "text": "needs_audit"
+                        },
+                        "C3": { // parsed from C3-urgent
+                          "value": 3,
+                          "text": "urgent"
                         },
                         "agg": {
-                          "min": 1,
-                          "max": 1,
-                          "count": 1
+                          "min": 1,   // related to the value 1 of C1
+                          "max": 3,   // related to the value 3 of C3
+                          "count": 2  // two C-labels were parsed (C1 and C3)
                         }
                     },
                     "D": {
-                        "D2": {
+                        "D2": { // parsed from D2-runtime
                           "value": 2,
                           "text": "runtime"
                         },
                         "agg": {
-                          "min": 2,
-                          "max": 2,
-                          "count": 1
+                          "min": 2,   // related to the value 2 of D2
+                          "max": 2,   // related to the value 2 of D2
+                          "count": 1  // one D-label was parsed (D2)
                         }
                     }
                 }
