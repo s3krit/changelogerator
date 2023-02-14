@@ -15,4 +15,5 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'git_diff_parser', '~> 3'
   s.add_runtime_dependency 'octokit', '~> 4'
   s.required_ruby_version = '>= 2.7'
+  s.metadata = { 'rubygems_mfa_required' => 'true' }
 end
