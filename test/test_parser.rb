@@ -86,4 +86,11 @@ class TestParser < Test::Unit::TestCase
       Label.new('123-foo')
     end
   end
+
+  def test_leading_zeroes
+    lbl = Label.new('A00099-foo')
+    assert_equal('A', lbl.code)
+    assert_equal(99, lbl.number)
+    assert_equal('foo', lbl.description)
+  end
 end
