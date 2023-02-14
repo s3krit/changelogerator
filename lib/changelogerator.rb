@@ -12,6 +12,7 @@ def parse_change_label(name)
   [letter, number, text]
 end
 
+# Compute and attach metadata about one change
 def compute_change_meta(change)
   meta = {}
 
