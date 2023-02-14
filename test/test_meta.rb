@@ -5,7 +5,7 @@ require_relative '../lib/changelogerator'
 require_relative './utils'
 require 'test/unit'
 
-class TestChangelogerator < Test::Unit::TestCase
+class TestMeta < Test::Unit::TestCase
   def test_meta_1_commit
     change = Change.new(%w[A1-foo A2-foo B0-foo B1-foo B2-foo])
     compute_change_meta(change)
