@@ -5,9 +5,12 @@ require_relative '../lib/changelogerator'
 require 'test/unit'
 
 class TestChangelogerator < Test::Unit::TestCase
-  def test_polkadot_1_commit
-    return unless ENV['GITHUB_TOKEN']
+  def setup
+    omit("Skipping because $GITHUB_TOKEN=#{ENV['GITHUB_TOKEN']}") if ENV['GITHUB_TOKEN'] == 'disabled'
+    raise 'Missing $GITHUB_TOKEN token' if (ENV['GITHUB_TOKEN']).empty?
+  end
 
+  def test_polkadot_1_commit
     ref1 = '2ebabcec7fcbb3d13a965a852df0559a4aa12a5e'
     ref2 = '9c05f9753b2f939ccf5ba18c08dd4c83c3ab9e0b'
     cl = Changelog.new(
@@ -24,8 +27,6 @@ class TestChangelogerator < Test::Unit::TestCase
   end
 
   def test_polkadot_many_commits
-    return unless ENV['GITHUB_TOKEN']
-
     ref1 = 'v0.9.8'
     ref2 = 'v0.9.11'
     cl = Changelog.new(
@@ -43,8 +44,6 @@ class TestChangelogerator < Test::Unit::TestCase
   end
 
   def test_cumulus_many_commits
-    return unless ENV['GITHUB_TOKEN']
-
     ref1 = 'statemine-v1.0.0'
     ref2 = 'statemine_v4'
     cl = Changelog.new(

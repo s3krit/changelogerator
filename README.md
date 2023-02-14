@@ -56,6 +56,12 @@ The produce json will be formatted as:
 
 The produced json output can then easily reprocessed into a beautiful changelog using tools such as [`tera`](https://github.com/chevdor/tera-cli).
 
+## Testing
+
+Some of the tests fetch data from GitHub. In case you do not have a
+`$GITHUB_TOKEN` or simply do not wish to run them, set `GITHUB_TOKEN=disabled`
+in your environment variables.
+
 ## Usage
 
 You can check out the [tests](./test) to see it in action or query the help:
