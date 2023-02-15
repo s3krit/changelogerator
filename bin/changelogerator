@@ -44,6 +44,13 @@ of the changes between 2 references on your Github project.
     puts opts
     exit
   end
+
+  opts.on('-V', '--version', 'Show the version') do
+    gemspec = "#{__dir__}/../changelogerator.gemspec"
+    gem = Gem::Specification.load(gemspec)
+    puts format('%<n>s v%<v>s', { v: gem.version, n: gem.name })
+    exit
+  end
 end.parse!
 
 @options[:repo] = ARGV[0]

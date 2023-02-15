@@ -10,6 +10,8 @@ Metrics/AbcSize:
   Enabled: false
 Metrics/ClassLength:
   Enabled: false
+Metrics/BlockLength:
+  Enabled: false
 AllCops:
   TargetRubyVersion: 2.7
   NewCops: enable

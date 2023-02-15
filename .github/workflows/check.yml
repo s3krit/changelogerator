@@ -29,6 +29,10 @@ jobs:
       - name: Lint check
         run: rubocop
 
+      - name: Set up tests
+        if: ${{ github.event_name == 'pull_request' }}
+        run: echo "GITHUB_TOKEN=disabled" >> "$GITHUB_ENV"
+
       - name: Run tests
         run: bundle exec rake test
 

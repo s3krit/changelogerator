@@ -3,8 +3,15 @@
 require 'json'
 require_relative '../lib/changelogerator'
 require 'test/unit'
+# require 'pry'
 
 class TestChangelogerator < Test::Unit::TestCase
+  def setup
+    gh_token = ENV['GITHUB_TOKEN']
+    omit("Skipping because $GITHUB_TOKEN=#{gh_token}") if gh_token == 'disabled'
+    raise 'Missing $GITHUB_TOKEN token' if gh_token.nil? || gh_token.empty?
+  end
+
   def test_polkadot_1_commit
     ref1 = '2ebabcec7fcbb3d13a965a852df0559a4aa12a5e'
     ref2 = '9c05f9753b2f939ccf5ba18c08dd4c83c3ab9e0b'
@@ -35,7 +42,7 @@ class TestChangelogerator < Test::Unit::TestCase
     assert_equal(244, cl.changes.length)
     puts format('JSON Length: %d', j.length)
     assert(j.length > 1_600_000)
-    assert(j.length < 1_700_000)
+    assert(j.length < 1_750_000)
   end
 
   def test_cumulus_many_commits

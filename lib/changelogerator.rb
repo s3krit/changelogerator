@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require 'label'
+require 'change'
+
 # A small wrapper class for more easily generating and manipulating Github/Git
 # changelogs. Given two different git objects (sha, tag, whatever), it will
 # find all PRs that made up that diff and store them as a list. Also allows
@@ -32,13 +35,19 @@ class Changelog
       change._links = nil
 
       change[:meta].each_key do |meta_key|
-        current = change[:meta][meta_key]
+        aggregate = change[:meta][meta_key]['agg']
 
-        meta[meta_key] = {} unless meta[meta_key]
-        meta[meta_key][:min] = current[:value] if !meta[meta_key][:min] || current[:value] < meta[meta_key][:min]
-        meta[meta_key][:max] = current[:value] if !meta[meta_key][:max] || current[:value] > meta[meta_key][:max]
-        meta[meta_key][:count] = 0 unless meta[meta_key][:count]
-        meta[meta_key][:count] += 1
+        if meta[meta_key]
+          meta[meta_key][:min] = aggregate['min'] if aggregate['min'] < meta[meta_key][:min]
+          meta[meta_key][:max] = aggregate['max'] if aggregate['max'] > meta[meta_key][:max]
+          meta[meta_key][:count] += aggregate['count']
+        else
+          meta[meta_key] = {
+            min: aggregate['min'],
+            max: aggregate['max'],
+            count: aggregate['count']
+          }
+        end
       end
     end
   end
@@ -50,18 +59,6 @@ class Changelog
     paths = [paths] unless paths.is_a? Array
     paths.each do |path|
       return true if changed_files.find { |l| l.match path }
-    end
-    nil
-  end
-
-  # Return the label code for a change
-  # if the label name matches the expected pattern.
-  # nil otherwise.
-  def self.get_label_code(name)
-    m = match = name.match(/^([a-z])(\d+)-(.*)$/i)
-    if m
-      letter, number, text = match.captures
-      return [letter, number, text]
     end
     nil
   end
@@ -83,16 +80,17 @@ class Changelog
     @repository = @gh.repository(@repo)
     @prefix = prefix
     ids = pr_ids_from_git_diff(from, to)
+    # The following takes very long time
     @changes = prs_from_ids(ids)
     @changes.map do |c|
-      compute_change_meta(c)
+      self.class.compute_change_meta(c)
     end
 
     compute_global_meta
   end
 
   def add(change)
-    compute_change_meta(change)
+    self.class.compute_change_meta(change)
     prettify_title(change)
     changes.prepend(change)
     @meta = compute_global_meta
@@ -123,24 +121,40 @@ class Changelog
     JSON.fast_generate(commits, opts)
   end
 
-  private
-
   # Compute and attach metadata about one change
-  def compute_change_meta(change)
+  def self.compute_change_meta(change)
     meta = {}
 
-    change.labels.each do |label|
-      letter, number, text = self.class.get_label_code(label.name)
-      next unless letter && number
+    change.labels.each do |lbl|
+      label = Label.new(lbl.name)
 
-      meta[letter] = {
-        value: number.to_i,
-        text: text
+      next unless label
+
+      if meta.key?(label.letter)
+        aggregate = meta[label.letter]['agg']
+        aggregate['max'] = label.number if label.number > aggregate['max']
+        aggregate['min'] = label.number if label.number < aggregate['min']
+        aggregate['count'] += 1
+      else
+        meta[label.letter] = {
+          'agg' => {
+            'count' => 1,
+            'max' => label.number,
+            'min' => label.number
+          }
+        }
+      end
+
+      meta[label.letter]["#{label.letter}#{label.number}"] = {
+        'value' => label.number,
+        'text' => label.description
       }
     end
 
     change['meta'] = meta
   end
+
+  private
 
   # Prepend the repo if @prefix is true
   def prettify_title(pull)
@@ -163,6 +177,7 @@ class Changelog
     end.compact.map(&:to_i)
   end
 
+  # TODO: See if we can make this quicker
   def prs_from_ids(ids)
     batch_size = 100
     prs = []
