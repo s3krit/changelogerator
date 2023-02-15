@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require_relative '../lib/label'
-require_relative '../lib/change'
+require 'label'
+require 'change'
 
 # A small wrapper class for more easily generating and manipulating Github/Git
 # changelogs. Given two different git objects (sha, tag, whatever), it will

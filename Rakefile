@@ -26,11 +26,12 @@ end
 # Build the gem
 task :build do
   sh 'gem build changelogerator.gemspec'
+  sh 'mv *.gem build/'
 end
 
 # Install the gem
 task install: :build do
-  sh format('gem install %s', gem_name)
+  sh format('gem install build/%s', gem_name)
 end
 
 # Publish the gem

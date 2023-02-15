@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative '../lib/label'
+require 'label'
 
 ### A class describe one change that can potentially have several labels
 class Change
