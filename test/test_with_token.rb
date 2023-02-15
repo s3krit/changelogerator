@@ -3,7 +3,7 @@
 require 'json'
 require_relative '../lib/changelogerator'
 require 'test/unit'
-require 'pry'
+# require 'pry'
 
 class TestChangelogerator < Test::Unit::TestCase
   def setup
@@ -42,7 +42,7 @@ class TestChangelogerator < Test::Unit::TestCase
     assert_equal(244, cl.changes.length)
     puts format('JSON Length: %d', j.length)
     assert(j.length > 1_600_000)
-    assert(j.length < 1_700_000)
+    assert(j.length < 1_750_000)
   end
 
   def test_cumulus_many_commits

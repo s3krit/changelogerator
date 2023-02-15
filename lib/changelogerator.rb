@@ -126,7 +126,6 @@ class Changelog
     meta = {}
 
     change.labels.each do |lbl|
-      # letter, number, text = parse_change_label(label.name)
       label = Label.new(lbl.name)
 
       next unless label

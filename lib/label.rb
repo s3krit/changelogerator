@@ -28,7 +28,7 @@ class Label
 
   ### Implemented for compatibility reasons
   def name
-    puts format('%<l>s%<n>d', { l: @letter, n: @number })
+    to_str
   end
 
   def to_str
