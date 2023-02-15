@@ -135,4 +135,5 @@ jq \
 
 - install: `bundle install`
 - test: `rake test` (some of the test appear to be UN responding for a good minute, see how to set `GITHUB_TOKEN` above to speed things up)
+- run single test: `ruby -I test test/test_with_token.rb -n test_polkadot_1_commit`
 - linting/formatting: `rubocop`

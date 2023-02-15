@@ -1,15 +1,10 @@
 # frozen_string_literal: true
 
+require_relative '../lib/label'
+
+### A class describe one change that can potentially have several labels
 class Change
   attr_reader :labels
-
-  class Label
-    attr_reader :name
-
-    def initialize(name)
-      @name = name
-    end
-  end
 
   def initialize(labels)
     @labels = labels.map do |label|

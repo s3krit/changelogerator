@@ -2,13 +2,13 @@
 
 require 'json'
 require_relative '../lib/changelogerator'
-require_relative './utils'
+require_relative '../lib/change'
 require 'test/unit'
 
-class TestMeta < Test::Unit::TestCase
+class TestLocal < Test::Unit::TestCase
   def test_meta_1_commit
     change = Change.new(%w[A1-foo A2-foo B0-foo B1-foo B2-foo])
-    compute_change_meta(change)
+    Changelog.compute_change_meta(change)
 
     assert_equal(%w[A B], change.meta.keys)
 

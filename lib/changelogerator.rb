@@ -1,49 +1,7 @@
 # frozen_string_literal: true
 
-# Return the label code for a change
-# if the label name matches the expected pattern.
-# nil otherwise.
-def parse_change_label(name)
-  m = match = name.match(/^([a-z])(\d+)-(.*)$/i)
-  return nil unless m
-
-  letter, digits, text = match.captures
-  number = digits.to_i
-  [letter, number, text]
-end
-
-# Compute and attach metadata about one change
-def compute_change_meta(change)
-  meta = {}
-
-  change.labels.each do |label|
-    letter, number, text = parse_change_label(label.name)
-
-    next unless letter && number
-
-    if meta.key?(letter)
-      aggregate = meta[letter]['agg']
-      aggregate['max'] = number if number > aggregate['max']
-      aggregate['min'] = number if number < aggregate['min']
-      aggregate['count'] += 1
-    else
-      meta[letter] = {
-        'agg' => {
-          'count' => 1,
-          'max' => number,
-          'min' => number
-        }
-      }
-    end
-
-    meta[letter]["#{letter}#{number}"] = {
-      'value' => number,
-      'text' => text
-    }
-  end
-
-  change['meta'] = meta
-end
+require_relative '../lib/label'
+require_relative '../lib/change'
 
 # A small wrapper class for more easily generating and manipulating Github/Git
 # changelogs. Given two different git objects (sha, tag, whatever), it will
@@ -122,16 +80,17 @@ class Changelog
     @repository = @gh.repository(@repo)
     @prefix = prefix
     ids = pr_ids_from_git_diff(from, to)
+    # The following takes very long time
     @changes = prs_from_ids(ids)
     @changes.map do |c|
-      compute_change_meta(c)
+      self.class.compute_change_meta(c)
     end
 
     compute_global_meta
   end
 
   def add(change)
-    compute_change_meta(change)
+    self.class.compute_change_meta(change)
     prettify_title(change)
     changes.prepend(change)
     @meta = compute_global_meta
@@ -162,6 +121,40 @@ class Changelog
     JSON.fast_generate(commits, opts)
   end
 
+  # Compute and attach metadata about one change
+  def self.compute_change_meta(change)
+    meta = {}
+
+    change.labels.each do |lbl|
+      # letter, number, text = parse_change_label(label.name)
+      label = Label.new(lbl.name)
+
+      next unless label
+
+      if meta.key?(label.letter)
+        aggregate = meta[label.letter]['agg']
+        aggregate['max'] = label.number if label.number > aggregate['max']
+        aggregate['min'] = label.number if label.number < aggregate['min']
+        aggregate['count'] += 1
+      else
+        meta[label.letter] = {
+          'agg' => {
+            'count' => 1,
+            'max' => label.number,
+            'min' => label.number
+          }
+        }
+      end
+
+      meta[label.letter]["#{label.letter}#{label.number}"] = {
+        'value' => label.number,
+        'text' => label.description
+      }
+    end
+
+    change['meta'] = meta
+  end
+
   private
 
   # Prepend the repo if @prefix is true
@@ -185,6 +178,7 @@ class Changelog
     end.compact.map(&:to_i)
   end
 
+  # TODO: See if we can make this quicker
   def prs_from_ids(ids)
     batch_size = 100
     prs = []

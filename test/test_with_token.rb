@@ -3,6 +3,7 @@
 require 'json'
 require_relative '../lib/changelogerator'
 require 'test/unit'
+require 'pry'
 
 class TestChangelogerator < Test::Unit::TestCase
   def setup
